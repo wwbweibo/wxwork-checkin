@@ -1,0 +1,45 @@
+[
+    {
+      "label": "解锁密码",
+      "name": "pwd"
+    },
+    {
+      "label": "上班打卡时间",
+      "name": "checkingTime",
+      "type": "time",
+      "value": "09:30",
+      "validation": "required"
+    },
+    {
+      "label": "是否开启上班快捷打卡,默认 否,此处一定要确认清楚,该功能为测试功能",
+      "type": "radio",
+      "name": "quickChecking",
+      "options": {
+        "0": "否",
+        "1": "是"
+      },
+      "value": "0",
+      "validation": "required"
+    },
+    {
+      "label": "手机解锁后 至 请求唤醒企业微信的间隔时间。单位：ms",
+      "name": "awakeningDelayTime",
+      "value": "0",
+      "validation": "required",
+      "help": "部分手机解锁后立即唤起企业微信可能会导致唤起失败，请根据自身情况进行设置"
+    },
+    {
+      "label": "每一步操作的时间间隔，默认 1000，视机型调整，单位：ms",
+      "name": "stepInterval",
+      "value": "1000",
+      "validation": "required"
+    },
+    {
+      "label": "请输入钉钉机器人地址",
+      "name": "dingtalk"
+    },
+    {
+      "label": "请输入假期服务地址",
+      "name": "holidayUrl"
+    }
+  ]
