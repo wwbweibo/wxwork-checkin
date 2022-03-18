@@ -32,7 +32,7 @@ clone 本仓库到你的服务器，并使用 cargo 构建之后运行，服务�
       {"today":"2022-03-18","is_holiday":false}
       ```
 - `http[s]://<yourip>:9999/holiday`
-  - 用于获取当天是否为假期
+  - 用于维护假期数据
   - method: POST
   - content-type: application/json
   - request body:
