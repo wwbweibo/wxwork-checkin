@@ -1,3 +1,5 @@
+use std::string;
+
 use actix_web::web;
 use actix_web::{get, post, App, HttpResponse, HttpServer, Responder};
 use chrono::{prelude::*, Duration};
@@ -27,6 +29,24 @@ async fn is_holiday() -> impl Responder {
         })
 }
 
+#[get("holiday/{date}")]
+async fn is_holiday_in_date(date: web::Path<String>) -> impl Responder {
+    let mut date_str = date.to_string();
+    if date_str.len() == 10 {
+        date_str += &(" 00:00:00".to_string());
+    }
+    let requested_date = chrono_tz::Asia::Shanghai
+        .datetime_from_str(date_str.as_str(), DATETIME_FORMAT)
+        .unwrap();
+    let result = check_is_holiday(requested_date).await;
+    HttpResponse::Ok()
+        .content_type("application/json")
+        .json(HolidayResponse {
+            today: date.to_string(),
+            is_holiday: result,
+        })
+}
+
 #[post("/holiday")]
 async fn set_holiday(req: web::Json<Vec<HolidayUpdateRequest>>) -> impl Responder {
     for period in req.iter() {
@@ -37,10 +57,15 @@ async fn set_holiday(req: web::Json<Vec<HolidayUpdateRequest>>) -> impl Responde
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| App::new().service(is_holiday).service(set_holiday))
-        .bind(("0.0.0.0", 9999))?
-        .run()
-        .await
+    HttpServer::new(|| {
+        App::new()
+            .service(is_holiday)
+            .service(set_holiday)
+            .service(is_holiday_in_date)
+    })
+    .bind(("0.0.0.0", 9999))?
+    .run()
+    .await
 }
 
 async fn check_is_holiday(date: DateTime<Tz>) -> bool {
@@ -94,14 +119,18 @@ async fn add_holiday(info: &HolidayUpdateRequest) -> bool {
     }
 
     let mut conn = Connector::new(DB_URL).unwrap();
-    conn.conn.as_mut().exec_batch(
-        "insert into holidays (date, is_holiday) Values(:date, :is_holiday)",
-        dates.iter().map(|p| params! {
-            "date" => p.date.as_str(),
-            "is_holiday" =>  p.is_holiday
-        }
-        ),
-    ).unwrap();
+    conn.conn
+        .as_mut()
+        .exec_batch(
+            "insert into holidays (date, is_holiday) Values(:date, :is_holiday)",
+            dates.iter().map(|p| {
+                params! {
+                    "date" => p.date.as_str(),
+                    "is_holiday" =>  p.is_holiday
+                }
+            }),
+        )
+        .unwrap();
 
     return true;
 }
